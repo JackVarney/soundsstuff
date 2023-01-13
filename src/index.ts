@@ -51,7 +51,8 @@ canvas.addEventListener("click", async () => {
 
 
 function x() {
-    ctx.fillStyle = 'rgba(0,0,0,0.01)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     window.requestAnimationFrame(x);

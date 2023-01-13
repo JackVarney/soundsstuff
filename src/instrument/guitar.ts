@@ -30,7 +30,7 @@ function guitar(track: { time: number, midi: number, dur: number }[]) {
         );
 
         Tone.Draw.schedule(() => {
-            ctx.filter = "blur(0px)";
+            ctx.filter = "blur(7px) sepia(100%)";
             drawSky(value.midi);
             ctx.filter = "blur(0px)";
         }, time);
