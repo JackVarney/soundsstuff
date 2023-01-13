@@ -1,73 +1,16 @@
 import * as Tone from "tone";
 import { Midi } from "@tonejs/midi";
+import { canvas, ctx, H, W } from "./config";
+import { bass } from "./instrument/bass";
+import { guitar } from "./instrument/guitar";
 
-function bass(track: { time: number, midi: number, dur: number }[]) {
-    const synth = new Tone.Synth({
-        oscillator: {
-            type: "triangle12",
-        },
-        envelope: {
-            attack: 0.1,
-            decay: 0.1,
-            sustain: 0.3,
-            release: 0.2,
-        },
-    }).toDestination();
+canvas.height = H;
+canvas.width = W
 
-    const panner = new Tone.Panner(0.5).toDestination();
-    synth.connect(panner);
-
-    const part = new Tone.Part((time, value) => {
-        synth.triggerAttackRelease(
-            // @ts-ignore
-            Tone.Frequency(value.midi, "midi"),
-            value.dur,
-            time,
-            0.1
-        );
-    }, track);
-
-    return part;
-}
-
-function guitar(track: { time: number, midi: number, dur: number }[]) {
-    const synth = new Tone.PolySynth(Tone.Synth, {
-        oscillator: {
-            type: "square12",
-        },
-        envelope: {
-            attack: 0.01,
-            decay: 0.4,
-            sustain: 0.00000000000001,
-            release: 1,
-        },
-    }).toDestination();
-
-    const filter = new Tone.Filter(10000, "highpass", -96).toDestination();
-    synth.connect(filter);
-
-    const reverb = new Tone.Reverb(0.25).toDestination();
-    synth.connect(reverb);
-
-    const panner = new Tone.Panner(-0.5).toDestination();
-    synth.connect(panner);
-
-    const part = new Tone.Part((time, value) => {
-        synth.triggerAttackRelease(
-            // @ts-ignore
-            Tone.Frequency(value.midi, "midi"),
-            value.dur,
-            time,
-            0.1
-        );
-    }, track);
-
-    return part;
-}
-
-const button = document.querySelector("button")!;
-button.addEventListener("click", async () => {
+async function getTracksFromMIDI() {
     const midi = await Midi.fromUrl("/ivy.mid");
+
+    console.log(midi)
 
     const [, bassTrack, guitarTrack] = midi.tracks.map((track) => {
         return track.notes.map((note) => {
@@ -79,10 +22,37 @@ button.addEventListener("click", async () => {
         });
     });
 
+    return {
+        bassTrack,
+        guitarTrack,
+    }
+}
+
+async function play() {
+    const { bassTrack, guitarTrack } = await getTracksFromMIDI();
+
     const bassPart = bass(bassTrack);
     const guitarPart = guitar(guitarTrack);
 
     bassPart.start(0);
     guitarPart.start(0);
+
     Tone.Transport.start();
+}
+
+const button = document.querySelector("button")!;
+button.addEventListener("click", async () => {
+
+    play();
 });
+
+
+function x() {
+    ctx.fillStyle = 'rgba(0,0,0,0.01)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    window.requestAnimationFrame(x);
+};
+
+x();
+
