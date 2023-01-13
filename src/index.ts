@@ -40,8 +40,11 @@ async function play() {
     Tone.Transport.start();
 }
 
-const button = document.querySelector("button")!;
-button.addEventListener("click", async () => {
+let hasStarted = false;
+canvas.addEventListener("click", async () => {
+    if (hasStarted) {
+        return;
+    }
 
     play();
 });
